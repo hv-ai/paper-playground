@@ -1,0 +1,113 @@
+{
+  "label": "Raven (Sept 2026): a team of AI agents with a host",
+  "source": {
+    "title": "Raven: The Harness of Harnesses for Composable Agentic Intelligence",
+    "authors": "EverMind AI",
+    "version": "arXiv 2609.33439v1",
+    "url": "https://arxiv.org/abs/2609.33439",
+    "note": "Written by a company about its own system, so the results are the authors' own. At 82 pages it is longer than the live upload limit of 40 pages, so this example can only be opened here."
+  },
+  "pdf_filename": "2609.33439v1.pdf",
+  "page_count": 82,
+  "settings": {
+    "length": "Medium",
+    "level": "Beginner",
+    "tone": "Playful",
+    "beyond": false
+  },
+  "lesson": {
+    "title": "Raven: The Harness of Harnesses for Composable Agentic Intelligence",
+    "what_this_paper_is": {
+      "one_line": "A paper from EverMind AI about a system that builds a team of specialised AI agents and has a host agent organise their work.",
+      "explanation": "AI agents are programs built on a large language model that can use tools to get real jobs done. The model is like the brain, but how well an agent does a job also depends on its harness: the tools it can use, what it remembers, the instructions it follows and what it does when something goes wrong. Building a good harness by hand for every job is slow. This paper introduces Raven, an open-source system with three big ideas. First, a Host Agent breaks a big goal into pieces, gives each piece to the best specialist agent, and puts the results together in the right order. Second, the harnesses can be improved from experience. Third, the system keeps memory of past work and a library of reusable how-to skills. The authors also give a theory for when teamwork like this should beat a single agent, and they report that Raven beat other systems on their tests."
+    },
+    "why_it_matters": {
+      "summary": "The paper says real projects need several specialisms in one workflow, and that building and combining specialised agent setups by hand does not scale across models and domains. Raven is the authors' attempt to build, improve and combine those setups automatically.",
+      "uses": [
+        "Projects that need several specialists, such as the paper's example of developing and operating a first-person shooter game",
+        "Four built-in specialists for research, coding, design and on-call operations work",
+        "Adding other agents to the same team, such as Claude Code, Codex, Hermes Agent and OpenClaw, which the paper names"
+      ]
+    },
+    "example": {
+      "title": "The restaurant kitchen",
+      "walkthrough": "Picture a busy restaurant. A cook is the model. The cook's harness is everything around them: the knives and pans at their station, the recipe cards, the rules for what to do if something burns. Now a customer orders a full dinner. Raven is like the head chef who takes the order. The head chef splits it into starter, main and dessert, hands each to the best station, and sets the order of work so the sauce is ready before the main is plated. Each finished plate is passed along to whoever needs it next. After service the kitchen writes notes on what worked, and keeps the best recipes on cards for next time. That is the paper's idea in a nutshell: split the job, match each piece to the right specialist, pass results along in the right order, and learn from every service."
+    },
+    "key_facts": [
+      {
+        "fact": "An agent's ability depends on both its model and its harness, which is everything around the model.",
+        "page": 4,
+        "quote": "An agent's practical capability therefore depends on both its model and its harness: the tool interfaces, context management, skills, execution policies, and recovery mechanisms surrounding the model."
+      },
+      {
+        "fact": "Raven is an open-source multi-agent system that builds and evolves harnesses and treats each model and harness pair as a unit that can be combined.",
+        "page": 1,
+        "quote": "We introduce Raven, The Harness of Harnesses, an open-source multi-agent ecosystem that automatically constructs and evolves modular harnesses for specific models and domains, treating each executable model–harness pair as a composable unit of intelligence."
+      },
+      {
+        "fact": "The Host Agent matches subtasks to agents and represents how they depend on each other as a directed acyclic graph.",
+        "page": 4,
+        "quote": "Within this ecosystem, the Host Agent organizes a collaboration by matching subtasks to registered capabilities and representing their dependencies as a directed acyclic graph (DAG)."
+      },
+      {
+        "fact": "On the authors' own planning benchmark, Raven ranked first on all four graph metrics with both tested models. Its Exact Match score was 10.4 and 10.5 percentage points above the strongest baseline.",
+        "page": 5,
+        "quote": "Raven ranks first among the compared systems on all four graph metrics under both tested backbones, with Exact Match gains of 10.4 and 10.5 percentage points over the strongest baseline for the two backbones, respectively."
+      },
+      {
+        "fact": "A curated skill library improved Raven on three benchmarks, with larger gains than OpenClaw on two of them.",
+        "page": 59,
+        "quote": "the SkillCorpus experiments show that a curated skill library improves Raven on three benchmarks, with larger gains than OpenClaw on two of them."
+      },
+      {
+        "fact": "The theory gives sufficient conditions for composition to work, and the authors say whether it applies in practice depends on the real agents and host.",
+        "page": 6,
+        "quote": "These are sufficient conditions for reliable composition, and their practical applicability depends on whether the implemented agents and host satisfy them."
+      }
+    ],
+    "things_to_know": [
+      {
+        "point": "Most results come from the authors' own tests.",
+        "why_it_matters": "The paper compares Raven with the strongest reported alternatives, and it introduces its own planning benchmark, so independent replication would add confidence."
+      },
+      {
+        "point": "The theory gives sufficient conditions, not guarantees.",
+        "why_it_matters": "The paper itself says whether the conditions hold depends on the real agents and the host."
+      },
+      {
+        "point": "Figure 1's research panel carries a footnote about answer exposure and unequal containment settings.",
+        "why_it_matters": "That wording suggests some of those comparisons were not perfectly like-for-like, so read those gains with care."
+      },
+      {
+        "point": "This is an 82-page paper, mostly theory and implementation detail.",
+        "why_it_matters": "This lesson covers the main idea and headline results, not the proofs or every benchmark."
+      }
+    ],
+    "key_terms": [
+      {
+        "term": "Agent harness",
+        "definition": "Everything around the model that lets it do a job: its tools, memory, skills, rules and ways to recover from errors."
+      },
+      {
+        "term": "Host Agent",
+        "definition": "The coordinator in Raven. It splits a goal into subtasks, picks agents for them and puts the results together."
+      },
+      {
+        "term": "DAG",
+        "definition": "A directed acyclic graph: a map of tasks with arrows showing what must finish first, and no loops back."
+      },
+      {
+        "term": "Backbone model",
+        "definition": "The underlying language model an agent system runs on. Comparisons use the same backbone so the test is fair."
+      },
+      {
+        "term": "Percentage points",
+        "definition": "The gap between two percentages. Going from 60% to 70% is a gain of 10 percentage points."
+      },
+      {
+        "term": "Skill",
+        "definition": "A reusable how-to procedure an agent can look up and follow, like a recipe card."
+      }
+    ]
+  }
+}

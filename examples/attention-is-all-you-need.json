@@ -1,0 +1,113 @@
+{
+  "label": "Attention Is All You Need (2017): the Transformer",
+  "source": {
+    "title": "Attention Is All You Need",
+    "authors": "Vaswani et al.",
+    "version": "arXiv 1706.03762v7",
+    "url": "https://arxiv.org/abs/1706.03762",
+    "note": "Explanation written for this app; short quotes are from the paper. The PDF is not included in this repo."
+  },
+  "pdf_filename": "1706.03762v7.pdf",
+  "page_count": 15,
+  "settings": {
+    "length": "Medium",
+    "level": "Beginner",
+    "tone": "Playful",
+    "beyond": false
+  },
+  "lesson": {
+    "title": "Attention Is All You Need",
+    "what_this_paper_is": {
+      "one_line": "A 2017 paper that swaps slow, step-by-step translation models for one that looks at a whole sentence at once.",
+      "explanation": "Before this paper, the best translation programs read a sentence one word at a time, passing a running summary along, a bit like reading through a keyhole. That made them slow to train, because each step had to wait for the one before it. The authors built a new design called the Transformer. Instead of marching word by word, it lets every word look at every other word at the same time and decide which ones matter most. That trick is called attention. The result was better translations, trained in a fraction of the time. The idea turned out to be so useful that it became the foundation for many of the AI language tools people use today."
+    },
+    "why_it_matters": {
+      "summary": "Translation and other language tasks relied on models that process text one step after another, which limits how much work can be done in parallel and makes training slow. The paper shows a design that processes a whole sentence at once and still beats the best earlier results.",
+      "uses": [
+        "Machine translation, the paper's main test (English to German and English to French)",
+        "Working out the grammatical structure of sentences (English constituency parsing)",
+        "Any task that turns one sequence into another, which the paper calls sequence transduction"
+      ]
+    },
+    "example": {
+      "title": "The group-project notes",
+      "walkthrough": "Imagine a class of eight students translating a paragraph together. Old way: the paragraph is split into words, and the notes are passed down the row one student at a time. Each student can only add to what the person before them wrote, so the last student sees a squished summary, and nobody can start until the person before has finished. Transformer way: everyone pins their note on one big board at the same time. Each student looks at the whole board, highlights the notes that matter for their own word (that highlighting is the attention), and writes their part. Everyone works at once, and nobody has to rely on a long chain of hand-me-down notes."
+    },
+    "key_facts": [
+      {
+        "fact": "The Transformer drops recurrence and convolutions and uses only attention.",
+        "page": 1,
+        "quote": "We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely."
+      },
+      {
+        "fact": "On English to German translation it scored 28.4 BLEU, more than 2 BLEU above the best earlier results.",
+        "page": 1,
+        "quote": "Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including ensembles, by over 2 BLEU."
+      },
+      {
+        "fact": "On English to French it reached 41.8 BLEU, a new single-model record, after 3.5 days on eight GPUs.",
+        "page": 1,
+        "quote": "our model establishes a new single-model state-of-the-art BLEU score of 41.8 after training for 3.5 days on eight GPUs"
+      },
+      {
+        "fact": "Training can run in parallel, and it reached a new best translation quality after as little as twelve hours on eight P100 GPUs.",
+        "page": 2,
+        "quote": "The Transformer allows for significantly more parallelization and can reach a new state of the art in translation quality after being trained for as little as twelve hours on eight P100 GPUs."
+      },
+      {
+        "fact": "Self-attention relates different positions of one sequence to build a representation of that sequence.",
+        "page": 2,
+        "quote": "Self-attention, sometimes called intra-attention is an attention mechanism relating different positions of a single sequence in order to compute a representation of the sequence."
+      },
+      {
+        "fact": "The authors also applied the Transformer to English constituency parsing, with large and limited training data.",
+        "page": 1,
+        "quote": "We show that the Transformer generalizes well to other tasks by applying it successfully to English constituency parsing both with large and limited training data."
+      }
+    ],
+    "things_to_know": [
+      {
+        "point": "BLEU is an automatic score, not a human judgement.",
+        "why_it_matters": "A higher BLEU usually means closer to human translations, but it does not capture everything that makes a translation good."
+      },
+      {
+        "point": "The main tests are translation, plus one parsing experiment.",
+        "why_it_matters": "The paper argues the idea generalizes, but most of the evidence is about translation."
+      },
+      {
+        "point": "Looking at every word against every other word gets costlier on very long inputs.",
+        "why_it_matters": "The paper's own comparison table lists self-attention as growing with the square of the sequence length, and it mentions a restricted version for very long sequences."
+      },
+      {
+        "point": "The numbers are from the paper's own 2017 setup.",
+        "why_it_matters": "Hardware, datasets and competing methods have changed since, so treat the scores as that paper's results, not today's rankings."
+      }
+    ],
+    "key_terms": [
+      {
+        "term": "Attention",
+        "definition": "A way for a model to weigh which other words matter most when it works on a given word."
+      },
+      {
+        "term": "Self-attention",
+        "definition": "Attention applied within one sentence, so each word can look at all the other words in the same sentence."
+      },
+      {
+        "term": "Recurrence",
+        "definition": "Reading a sentence one step at a time and carrying a summary forward, like passing a note down a row."
+      },
+      {
+        "term": "BLEU",
+        "definition": "A score that compares a machine translation with human reference translations. Higher is better."
+      },
+      {
+        "term": "Encoder and decoder",
+        "definition": "The encoder reads and understands the input sentence. The decoder writes the output sentence."
+      },
+      {
+        "term": "Parallelization",
+        "definition": "Doing many pieces of work at the same time instead of one after another, which makes training faster."
+      }
+    ]
+  }
+}
