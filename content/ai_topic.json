@@ -1,0 +1,8 @@
+{
+  "as_of": "2026-10-09",
+  "title": "Huge AI models that only wake up a few experts",
+  "hook": "Reflection AI announced Beam, an open model with 501 billion parameters in total but only 23 billion active at a time. It was trained on 23.8 trillion tokens, and the weights and technical report are due later this month.",
+  "explain": "This design is called a sparse mixture of experts. The model is split into many small expert networks, and for each word only a few are used. That keeps the model big and knowledgeable while making each answer cheaper to compute.",
+  "source_title": "AI Weekly, October 6, 2026",
+  "source_url": "https://aiweekly.co/ai-news-today/edition/2026-10-06"
+}

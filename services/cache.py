@@ -21,6 +21,7 @@ class CachedLesson:
     result: LessonResult
     held_out: list
     hidden_chars_removed: int
+    total_pages: int = 0
 
 
 def make_key(pdf_bytes: bytes, options: LessonOptions, model: str) -> str:

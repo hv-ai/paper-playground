@@ -86,7 +86,7 @@ def test_confidential_document_is_refused():
     data = make_pdf([{"unique": ["CONFIDENTIAL - for internal use only. Do not distribute."]}, {}, {}])
     with pytest.raises(PaperRejected) as info:
         prepare_paper(data)
-    assert "public papers only" in str(info.value)
+    assert "public documents only" in str(info.value)
 
 
 def test_pdf_with_no_text_is_refused():

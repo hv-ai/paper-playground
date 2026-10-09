@@ -14,10 +14,12 @@ from dataclasses import dataclass
 from services.pdf_reader import Page
 
 MAX_UPLOAD_BYTES = 15 * 1024 * 1024
-MAX_PAGES = 40
+MAX_REJECT_PAGES = 300  # beyond this it is a book or a manual, not something we can explain
+MAX_HELD_OUT = 8  # this many instruction-like sentences means the file is not a normal document
+MAX_PAGES = 80  # longer files are trimmed to the first 80 pages, not rejected
 MIN_TEXT_CHARS = 1500  # fewer than this usually means a scanned PDF with no text layer
 CONFIDENTIAL_SCAN_PAGES = 3
-MAX_PROMPT_CHARS = 90_000  # about 22K tokens: well inside a free-tier request
+MAX_PROMPT_CHARS = 300_000  # about 75K tokens: inside the free-tier 250K tokens-per-minute limit
 
 CONFIDENTIAL_PATTERNS = [
     r"\bconfidential\b",
@@ -59,27 +61,27 @@ class CheckResult:
 
 def check_upload_bytes(data: bytes) -> CheckResult:
     if not data:
-        return CheckResult(False, "That file is empty.")
+        return CheckResult(False, "📭 That file is empty.")
     if len(data) > MAX_UPLOAD_BYTES:
         mb = MAX_UPLOAD_BYTES // (1024 * 1024)
-        return CheckResult(False, f"That file is too large. The limit is {mb} MB.")
+        return CheckResult(False, f"📦 That file is too large (the limit is {mb} MB).")
     if not data.lstrip()[:5] == b"%PDF-":
-        return CheckResult(False, "That does not look like a PDF file.")
+        return CheckResult(False, "🤔 That does not look like a real PDF file.")
     return CheckResult(True)
 
 
 def check_page_count(count: int) -> CheckResult:
     if count < 1:
-        return CheckResult(False, "That PDF has no pages.")
-    if count > MAX_PAGES:
-        return CheckResult(False, f"That paper has {count} pages. The limit is {MAX_PAGES}.")
+        return CheckResult(False, "📭 That PDF has no pages.")
+    if count > MAX_REJECT_PAGES:
+        return CheckResult(False, f"📚 That file has {count} pages. That is more like a book or a manual than a paper.")
     return CheckResult(True)
 
 
 def check_text_amount(pages: list[Page]) -> CheckResult:
     total = sum(len(p.text.strip()) for p in pages)
     if total < MIN_TEXT_CHARS:
-        return CheckResult(False, "I could not find enough readable text. Scanned PDFs are not supported yet.")
+        return CheckResult(False, "🖼️ I could not find enough readable text. It looks like a scanned or image-only PDF.")
     return CheckResult(True)
 
 
