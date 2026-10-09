@@ -33,7 +33,7 @@ def first_pages_text(pdf_path, max_pages=3, max_chars=8000):
     parts = []
     with pdfplumber.open(pdf_path) as pdf:
         for number, page in enumerate(pdf.pages[:max_pages], start=1):
-            parts.append(f"[PAGE {number}]\n{page.extract_text() or ''}")
+            parts.append(f"[PAGE {number}]\n{page.extract_text(x_tolerance=1.5) or ''}")
     return "\n\n".join(parts)[:max_chars]
 
 
@@ -76,7 +76,8 @@ def main():
     try:
         data = json.loads(response.text)
         quote = data.get("supporting_quote", "")
-        found = quote.strip() != "" and quote in text
+        norm = lambda x: " ".join(x.split())
+        found = quote.strip() != "" and norm(quote) in norm(text)
         print(f"Quote found in the sent text: {found} (claimed page: {data.get('quote_page')})")
     except json.JSONDecodeError:
         print("Response was not valid JSON")
