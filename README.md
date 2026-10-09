@@ -12,7 +12,7 @@ with cited answers, and diagrams.
 
     python3 -m venv .venv
     source .venv/bin/activate
-    pip install -r requirements.txt
+    pip install -r requirements-dev.txt   # app + test tools (the deployed app only needs requirements.txt)
     cp .streamlit/secrets.toml.example .streamlit/secrets.toml   # then add your key
     streamlit run app.py
 
