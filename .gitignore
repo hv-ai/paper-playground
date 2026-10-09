@@ -1,0 +1,15 @@
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+
+# Secrets: never commit these
+.env
+.streamlit/secrets.toml
+
+# Uploaded or downloaded papers stay out of the repo
+uploads/
+*.pdf
+
+# macOS
+.DS_Store
