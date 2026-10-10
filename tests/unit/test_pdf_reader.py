@@ -32,3 +32,46 @@ def test_hidden_text_is_removed_and_counted():
 def test_max_pages_is_respected():
     data = make_pdf([{"unique": [f"page {i}"]} for i in range(5)])
     assert len(read_pdf(data, max_pages=2)) == 2
+
+
+def _two_column_pdf():
+    """A page like most papers: a full-width title, then two text columns."""
+    import io
+    from reportlab.lib.pagesizes import A4
+    from reportlab.pdfgen import canvas
+    buffer = io.BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(110, height - 60, "A Study of Two Column Reading Order In Papers")
+    pdf.setFont("Helvetica", 10)
+    left = ["The left column explains the method in plain", "words and continues down the page until it",
+            "reaches the bottom of the column and stops."] * 8
+    right = ["The right column reports the results and", "closes with a short note about limits that",
+             "a reader should keep in mind afterwards."] * 8
+    y = height - 100
+    for a, b in zip(left, right):
+        pdf.drawString(50, y, a)
+        pdf.drawString(310, y, b)
+        y -= 14
+    pdf.save()
+    return buffer.getvalue()
+
+
+def test_two_column_pages_are_read_one_column_at_a_time():
+    from services.pdf_reader import read_pdf
+    text = read_pdf(_two_column_pdf())[0].text
+    flat = " ".join(text.split())
+    assert "A Study of Two Column Reading Order In Papers" in flat  # full-width title survives whole
+    # A sentence that wraps over two lines of the left column stays in one piece.
+    assert "explains the method in plain words and continues down the page" in flat
+    assert "reports the results and closes with a short note about limits" in flat
+    # And the left column comes before the right column.
+    assert flat.index("The left column") < flat.index("The right column")
+
+
+def test_one_column_pages_are_unchanged():
+    from services.pdf_reader import find_gutter, read_pdf
+    from tests.conftest import make_pdf
+    pages = read_pdf(make_pdf([{"unique": ["Plain single column sentence for the test."]}]))
+    assert "Plain single column sentence for the test." in pages[0].text

@@ -36,7 +36,7 @@ class SessionUsage:
 
 class UsageLimiter:
     def __init__(self, daily_lessons: int = 100, daily_questions: int = 300, daily_requests: int = 400,
-                 session_papers: int = 2, session_questions: int = 8,
+                 session_papers: int = 5, session_questions: int = 8,
                  min_seconds_between_requests: float = 4.0,
                  quota_error_threshold: int = 3, quota_window_seconds: float = 600.0,
                  cooldown_seconds: float = 900.0,
