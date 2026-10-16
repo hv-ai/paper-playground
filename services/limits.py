@@ -110,6 +110,9 @@ class UsageLimiter:
         """Claim the single generation slot. Returns False if someone else is using it."""
         return self._busy.acquire(blocking=False)
 
+    def generation_busy(self) -> bool:
+        return self._busy.locked()
+
     def finish(self):
         if self._busy.locked():
             self._busy.release()

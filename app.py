@@ -20,6 +20,7 @@ from services.errors import ModelError, QuotaExceeded
 from services.examples import list_examples, load_example
 from services.lesson import LENGTHS, LEVELS, TONES, LessonError, LessonOptions, generate_lesson
 from services.news import NewsFeed, PACIFIC
+from services.waiting import WaitingRoom
 from services.limits import SessionUsage, UsageLimiter
 from services.pipeline import PaperRejected, PreparedPaper, prepare_paper
 from ui import style
@@ -39,7 +40,7 @@ def secret(name: str, default: str | None = None) -> str | None:
 @st.cache_resource
 def get_limiter() -> UsageLimiter:
     # Daily counters are also saved to a small temp file so a rerun does not reset them (best effort).
-    return UsageLimiter(state_path=os.path.join(tempfile.gettempdir(), "paper_playground_usage.json"))
+    return UsageLimiter(session_papers=5, state_path=os.path.join(tempfile.gettempdir(), "paper_playground_usage.json"))
 
 
 @st.cache_resource
@@ -185,13 +186,89 @@ def show_lesson(result, prepared, options: LessonOptions) -> None:
 
 
 def run(pdf_bytes: bytes, client: GeminiClient, options: LessonOptions):
-    with st.status("Preparing your explanation...", expanded=True) as status:
-        st.write("Checking the file...")
+    with st.status("Interesting paper! 🤓 Your explanation is coming up...", expanded=True) as status:
+        st.write("Reading your paper...")
         prepared = prepare_paper(pdf_bytes)  # raises PaperRejected before any model call
         st.write("Writing the lesson, then checking every quote against the paper...")
         result = generate_lesson(prepared.pages, client, options)
         status.update(label="Explanation ready", state="complete", expanded=False)
     return result, prepared
+
+
+@st.cache_resource
+def get_waiting_room() -> WaitingRoom:
+    return WaitingRoom()
+
+
+@st.fragment(run_every="2s")
+def waiting_panel() -> None:
+    pending = st.session_state.get("pending_explanation")
+    if not pending:
+        return
+    queue, limiter = get_waiting_room(), get_limiter()
+    ticket = pending["ticket"]
+    position = queue.touch(ticket)
+    if position is None:
+        st.warning("Your waiting request expired while the page was inactive or the app restarted. Your selected paper is ready to submit again.")
+        if st.button("Return to my paper"):
+            st.session_state.pop("pending_explanation", None)
+            st.rerun()
+        return
+    if position == 1 and not limiter.generation_busy():
+        st.session_state["generation_ready"] = True
+        st.rerun()
+    st.info("Interesting paper! 🤓 You're in line—your explanation will start automatically.")
+    st.markdown(f"**Your waiting position: {position}**")
+    st.caption("Keep this page open. While you wait, explore the latest AI news in the sidebar. No explanation credit is used until your turn starts.")
+    if st.button("Cancel request", key="cancel_waiting"):
+        queue.cancel(ticket)
+        st.session_state.pop("pending_explanation", None)
+        st.rerun()
+
+
+def generate_pending_explanation() -> None:
+    """Run generation on the full app, outside the periodically refreshed fragment."""
+    pending = st.session_state["pending_explanation"]
+    limiter = get_limiter()
+    if not get_waiting_room().claim(pending["ticket"], limiter):
+        return
+    st.info("Interesting paper! 🤓 Turning those big ideas into a clear explanation…")
+    outcome = None
+    try:
+        cached = get_cache().get(pending["key"])
+        if cached is not None:
+            result = cached.result
+            prepared = PreparedPaper([], cached.held_out, cached.hidden_chars_removed, cached.total_pages)
+            from_cache = True
+        else:
+            reserved, message = limiter.reserve_lesson(st.session_state["usage"])
+            if not reserved:
+                st.session_state["generation_notice"] = ("warning", message)
+                st.rerun()
+            result, prepared = run(pending["pdf"], get_client(secret("GEMINI_API_KEY"), pending["model"], limiter), pending["options"])
+            get_cache().put(pending["key"], CachedLesson(result, prepared.held_out, prepared.hidden_chars_removed, prepared.total_pages))
+            from_cache = False
+        st.session_state["shown"] = (result, prepared, pending["options"])
+        st.session_state["active_pdf"] = pending["pdf"]
+        st.session_state["from_cache"] = from_cache
+        st.session_state["example"] = None
+        st.session_state["editing_preferences"] = False
+    except PaperRejected as error:
+        limiter.refund_lesson(st.session_state["usage"])
+        outcome = ("error", str(error))
+    except QuotaExceeded as error:
+        outcome = ("warning", str(error) or "The model quota is used up for now. Please try again later.")
+    except (ModelError, LessonError) as error:
+        outcome = ("error", str(error))
+    except Exception as error:
+        print(f"unexpected generation error: {type(error).__name__}", file=sys.stderr)
+        outcome = ("error", "Something went wrong. Your paper is still selected; please try again.")
+    finally:
+        limiter.finish()
+        st.session_state.pop("pending_explanation", None)
+    if outcome:
+        st.session_state["generation_notice"] = outcome
+    st.rerun()
 
 
 @st.cache_resource
@@ -228,6 +305,11 @@ def main() -> None:
         st.caption("Understand the research.")
         if reading:
             if st.button("＋ Explore another paper", use_container_width=True):
+                pending = st.session_state.pop("pending_explanation", None)
+                if pending:
+                    get_waiting_room().cancel(pending["ticket"])
+                st.session_state.pop("draft_request", None)
+                st.session_state.pop("generation_ready", None)
                 for name in ("shown", "example", "from_cache", "editing_preferences", "active_pdf", "fetched", "question_index", "question_history", "public_paper_confirmation"):
                     st.session_state.pop(name, None)
                 st.session_state["upload_version"] = st.session_state.get("upload_version", 0) + 1
@@ -246,6 +328,14 @@ def main() -> None:
             st.caption("Use public papers only. Paper text is sent to the model provider. Uploaded PDFs are not saved to disk; the active PDF is kept in this session so you can update the explanation.")
 
     st.markdown(style.HERO if not reading else style.WORKSPACE_HEADER, unsafe_allow_html=True)
+    notice = st.session_state.pop("generation_notice", None)
+    if notice:
+        (st.warning if notice[0] == "warning" else st.error)(notice[1])
+    if st.session_state.get("pending_explanation"):
+        if st.session_state.pop("generation_ready", False):
+            generate_pending_explanation()
+        waiting_panel()
+        return
     go, open_example, choice = False, False, None
     needs_public_confirmation = False
     pdf_bytes = st.session_state.get("active_pdf")
@@ -287,10 +377,13 @@ def main() -> None:
                         del st.session_state["fetched"]
                         st.rerun()
                 needs_public_confirmation = upload is not None and not is_public
-                pdf_bytes = upload.getvalue() if upload is not None else (fetched[0] if fetched else None)
+                draft = st.session_state.get("draft_request")
+                pdf_bytes = upload.getvalue() if upload is not None else (fetched[0] if fetched else (draft["pdf"] if draft else None))
+                if upload is None and fetched is None and draft:
+                    st.caption("Your previously selected public PDF is ready. Choose a new file above to replace it.")
                 if upload is not None and fetched:
                     st.caption("Your uploaded PDF will be used instead of the arXiv selection.")
-            defaults = shown_options if reading else LessonOptions()
+            defaults = shown_options if reading else st.session_state.get("draft_request", {}).get("options", LessonOptions())
             st.markdown("### " + ("Reading preferences" if reading else "2. Make it yours"))
             st.caption("Level changes the depth. Tone changes the voice. Choose them independently.")
             level = st.radio("Your level", list(LEVELS), index=list(LEVELS).index(defaults.level), horizontal=True,
@@ -348,31 +441,15 @@ def main() -> None:
             st.session_state["example"] = None
         elif not api_key:
             st.error("This app is not configured yet (no API key).")
-        elif not limiter.try_start():  # one generation at a time
-            st.warning("The explanation service is busy with another visitor. Your paper and preferences are still selected. Wait a moment, then click Explain again. You can browse an example while waiting.")
         else:
-            try:
-                reserved, message = limiter.reserve_lesson(usage)  # check and reserve in one atomic step
-                if not reserved:
-                    st.warning(message)
-                else:
-                    result, prepared = run(pdf_bytes, get_client(api_key, model, limiter), options)
-                    cache.put(key, CachedLesson(result, prepared.held_out, prepared.hidden_chars_removed, prepared.total_pages))
-                    st.session_state["shown"] = (result, prepared, options)
-                    st.session_state["from_cache"] = False
-                    st.session_state["example"] = None
-            except PaperRejected as error:
-                limiter.refund_lesson(usage)  # no model call was made, so give the reservation back
-                st.error(str(error))
-            except QuotaExceeded as error:
-                st.warning(str(error) or "The free capacity for this app is used up for now. Please try again later.")
-            except (ModelError, LessonError) as error:
-                st.error(str(error))
-            except Exception as error:  # never show internals to a visitor
-                print(f"unexpected error: {type(error).__name__}", file=sys.stderr)
-                st.error("Something went wrong. Please try again.")
-            finally:
-                limiter.finish()
+            ticket = get_waiting_room().join()
+            if ticket is None:
+                st.warning("The waiting room is full right now. Please try again shortly; no explanation credit was used.")
+            else:
+                pending = {"ticket": ticket, "pdf": pdf_bytes, "options": options, "model": model, "key": key}
+                st.session_state["pending_explanation"] = pending
+                st.session_state["draft_request"] = {"pdf": pdf_bytes, "options": options}
+                st.rerun()
 
     if go and "shown" in st.session_state and st.session_state["shown"] is not previous_result:
         st.session_state["active_pdf"] = pdf_bytes

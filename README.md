@@ -81,3 +81,17 @@ This is an in-app refresh, not a scheduled job while the app is asleep. Dates an
 are shown; headlines older than 14 days or in the future are excluded. Feed failures retry
 after 15 minutes when checked and label retained results with their last successful refresh.
 No model call, API key, paper upload, or explanation allowance is used for news.
+
+## Waiting experience
+
+When a visitor submits a new explanation, an in-memory FIFO waiting room starts
+it automatically when the single generation slot becomes available. The waiting
+panel refreshes every two seconds, shows its one-based waiting position, and offers
+cancellation. The queue holds at most eight waiting tickets; a full queue asks the
+visitor to retry without consuming an explanation allowance. Daily and per-visit
+limits are checked when generation starts. Matching cached completions stay free.
+
+Visitors must keep the page open. Tickets that receive no heartbeat for three
+minutes expire, allowing others to proceed. The queue is scoped to the running app
+process; a restart clears it. PDFs and settings stay in each session, not in the
+shared ticket list. This is a small-app queue, not a durable distributed job system.
