@@ -28,7 +28,7 @@ def test_session_paper_cap():
     for _ in range(limiter.session_papers):
         assert limiter.reserve_lesson(session)[0]
     ok, message = limiter.reserve_lesson(session)
-    assert not ok and "papers" in message
+    assert not ok and "explanations" in message
 
 
 def test_session_question_cap():

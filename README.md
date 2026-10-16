@@ -5,8 +5,11 @@ three sections (what the paper is, key facts with page references, key things to
 plus key-term cards. You can set the level, length and tone, and upload a PDF or find a
 paper on arXiv.
 
-Status: in development (Week 1 project, GenAI Academy). Not built yet: follow-up questions
-with cited answers, and diagrams.
+Status: research-studio interface with personalized paper explanations. Follow-up Q&A is not included.
+
+Choose level, tone, and length before generating an explanation. Results are organized into Overview, Key findings, Limitations, and Key terms. Supporting passages expand inside findings. Changing preferences requires an explicit Update explanation action.
+
+Limits: 5 explanation attempts per visit, with shared daily caps of 100 explanations and 400 model requests. Cached results and prewritten examples do not consume another explanation allowance. Failed reserved model attempts also count.
 
 ## Run locally
 
@@ -56,6 +59,7 @@ claims that mention a number missing from their quote; judging support properly 
 - Uses a free-tier model API with billing disabled. Free-tier limits are shared and can change.
 - Use public papers only. Free-tier content may be used by the provider to improve its products.
 - Do not commit API keys or uploaded PDFs.
+- The active PDF stays in server session memory until replaced or the session ends so preferences can be updated; it is not saved as a user library.
 
 ## Find a paper on arXiv
 
@@ -68,3 +72,12 @@ pattern and builds the `arxiv.org` address itself. The downloaded PDF goes throu
 Files up to 15 MB are accepted. Only the first 80 pages are read (longer files are trimmed, and the lesson says so),
 and at most about 300,000 characters are sent to the model. Files over 300 pages, scanned or image-only PDFs,
 confidential-looking files and files full of instruction-like text are refused with a friendly message.
+
+## Sidebar AI news
+
+Displays up to three recent headlines from official OpenAI and Hugging Face RSS feeds.
+Refreshes on the next app visit or hourly open-session check after the Pacific date changes.
+This is an in-app refresh, not a scheduled job while the app is asleep. Dates and source links
+are shown; headlines older than 14 days or in the future are excluded. Feed failures retry
+after 15 minutes when checked and label retained results with their last successful refresh.
+No model call, API key, paper upload, or explanation allowance is used for news.

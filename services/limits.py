@@ -36,7 +36,7 @@ class SessionUsage:
 
 class UsageLimiter:
     def __init__(self, daily_lessons: int = 100, daily_questions: int = 300, daily_requests: int = 400,
-                 session_papers: int = 5, session_questions: int = 8,
+                 session_papers: int = 5, session_questions: int = 10,
                  min_seconds_between_requests: float = 4.0,
                  quota_error_threshold: int = 3, quota_window_seconds: float = 600.0,
                  cooldown_seconds: float = 900.0,
@@ -121,7 +121,7 @@ class UsageLimiter:
             if self._clock() < self._cooldown_until:
                 return False, self._cooldown_message()
             if session.papers >= self.session_papers:
-                return False, f"You have used your {self.session_papers} papers for this visit."
+                return False, f"You have used your {self.session_papers} explanations for this visit."
             if self._lessons >= self.daily_lessons or self._requests >= self.daily_requests:
                 return False, "Today's free capacity is used up. Please try again tomorrow, or open an example lesson."
             self._lessons += 1

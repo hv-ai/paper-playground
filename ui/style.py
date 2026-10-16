@@ -113,3 +113,103 @@ NOTES = {
 def subhead(title: str) -> str:
     assert title in SUBHEADS
     return f'<div class="pp-sub">{title}</div>' + (f'<div class="pp-note">{NOTES[title]}</div>' if title in NOTES else "")
+
+CSS += """
+<style>
+.stApp{background:#f6f4ee;color:#172e40;}
+.block-container{max-width:1120px;padding-top:2rem;padding-bottom:3rem;}
+[data-testid="stSidebar"]{background:#eceee7;border-right:1px solid #dde2da;}
+h1,h2,h3{color:#172e40;letter-spacing:-.025em;}
+h1,h2{font-family:Georgia,serif;font-weight:400;}
+.pp-hero-new{padding:45px 40px;margin-bottom:28px;border-radius:16px;color:#f5f8fb;background:radial-gradient(ellipse at 5% 110%,#215361 0,transparent 60%),radial-gradient(ellipse at 95% 0,#273c5c 0,transparent 60%),#0b192b;}
+.pp-brand{font-family:Georgia,serif;font-size:1.3rem;color:#f5f8fb;}
+.pp-eyebrow{text-transform:uppercase;letter-spacing:.17em;font-size:.72rem;color:#9dd9ce;margin:25px 0 12px;}
+.pp-hero-new h1{font-size:3.5rem;line-height:1.05;color:#f5f8fb;margin:0 0 18px;}
+.pp-hero-new h1 em{color:#9dd9ce;font-weight:400;}
+.pp-hero-new p{color:#c3d0db;max-width:650px;margin:0;font-size:1.03rem;}
+.pp-workspace-head{background:#0b192b;padding:17px 23px;border-radius:10px;margin-bottom:24px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+.pp-workspace-head span{color:#b7cbd5;font-size:.9rem;}
+[data-testid="stFileUploader"]{background:#eef4f0;border-radius:9px;padding:14px;}
+[data-testid="stTabs"] [data-baseweb="tab-list"]{gap:10px;flex-wrap:wrap;}
+[data-testid="stTabs"] [data-baseweb="tab"]{color:#526b75;}
+[data-testid="stTabs"] [aria-selected="true"]{color:#087f83;}
+button[kind="primary"]{background:#087f83;border-color:#087f83;border-radius:8px;}
+.pp-chip{background:#e2eee7;color:#285c54;padding:5px 12px;margin-bottom:8px;}
+.pp-sub{color:#245b5c;font-size:1.05rem;margin-top:24px;}
+.pp-note{color:#526974;}
+.pp-steps{gap:20px;margin-top:28px;}
+.pp-step{background:transparent;border:0;padding:0;}
+.pp-step b{color:#173b49;}
+.pp-step span.n,.pp-step.s2 span.n,.pp-step.s3 span.n{background:#087f83;}
+.pp-num.c0,.pp-num.c1,.pp-num.c2,.pp-num.c3{background:#e0eee6;color:#245d54;}
+.pp-dot.c0,.pp-dot.c1,.pp-dot.c2,.pp-dot.c3{color:#087f83;}
+@media(max-width:640px){.block-container{padding:1rem;}.pp-hero-new{padding:28px 23px;}.pp-hero-new h1{font-size:2.5rem;}.pp-steps{grid-template-columns:1fr;}}
+</style>
+"""
+HERO = """
+<section class="pp-hero-new"><div class="pp-brand">Paper Playground 🤓</div>
+<div class="pp-eyebrow">Your paper. Your level. Your tone.</div>
+<h1>Understand the <em>research.</em></h1>
+<p>Bring the paper you’re curious about. Choose how you want it explained, explore its findings, and make sense of the unfamiliar.</p></section>
+"""
+WORKSPACE_HEADER = """
+<div class="pp-workspace-head"><div class="pp-brand">Paper Playground 🤓</div><span>Understand the research.</span></div>
+"""
+STEPS = """
+<div class="pp-steps"><div class="pp-step"><b><span class="n">1</span>Your paper</b>Upload a public PDF or find it on arXiv.</div>
+<div class="pp-step"><b><span class="n">2</span>Your preferences</b>Choose the level, tone, and length independently.</div>
+<div class="pp-step"><b><span class="n">3</span>Your understanding</b>Explore the idea, findings, caveats, and key terms.</div></div>
+"""
+
+# Research-studio theme: one continuous canvas with calm, opaque reading surfaces.
+CSS += """
+<style>
+.stApp{color:#e5eaf4;background:radial-gradient(ellipse at 0 35%,#253f50 0,transparent 55%),radial-gradient(ellipse at 100% 85%,#352a54 0,transparent 50%),repeating-linear-gradient(0deg,transparent 0,transparent 55px,#ffffff04 55px,#ffffff04 56px),#101b2d;background-attachment:fixed;}
+[data-testid="stHeader"]{background:#101b2df0;}
+[data-testid="stSidebar"]{background:#142137;border-right:1px solid #ffffff15;color:#dbe3f0;}
+h1,h2,h3,[data-testid="stSidebar"] h3{color:#e5eaf4;}
+.pp-hero-new{background:transparent;border-radius:0;padding:32px 5px 30px;margin-bottom:14px;}
+.pp-brand{font-family:Arial,sans-serif;letter-spacing:-.04em;}
+.pp-hero-new h1{font-size:3.7rem;max-width:700px;}
+.pp-hero-new h1 em{color:#c0b2ff;}
+.pp-eyebrow{color:#b9ade5;}
+.pp-hero-new p{color:#bfcbdc;}
+.pp-workspace-head{background:#17253c;border:1px solid #ffffff12;}
+.st-key-paper_setup{background:#fbfbfd!important;color:#172e40!important;padding:25px;border:1px solid #ffffff40!important;border-radius:15px;box-shadow:0 20px 65px #0003;}
+.st-key-reading_workspace{background:#fbfbfd;color:#172e40;padding:25px;border-radius:14px;box-shadow:0 14px 50px #0002;}
+:is(.st-key-paper_setup,.st-key-reading_workspace) :is(h1,h2,h3,h4,h5,p,label,summary,[data-testid="stWidgetLabel"],[data-testid="stMarkdownContainer"]){color:#172e40;}
+:is(.st-key-paper_setup,.st-key-reading_workspace) [data-testid="stCaptionContainer"] p{color:#586a79;}
+:is(.st-key-paper_setup,.st-key-reading_workspace) [data-baseweb="input"]{background:#f2f2f8;}
+:is(.st-key-paper_setup,.st-key-reading_workspace) input{color:#172e40!important;background:#f2f2f8!important;}
+:is(.st-key-paper_setup,.st-key-reading_workspace) [data-baseweb="tab"]{color:#536178;}
+:is(.st-key-paper_setup,.st-key-reading_workspace) [aria-selected="true"]{color:#6556b4;}
+.st-key-paper_setup [data-testid="stFileUploader"],.st-key-paper_setup [data-testid="stFileUploaderDropzone"]{background:#eeecf8;color:#172e40;}
+.st-key-paper_setup [data-testid="stFileUploaderDropzone"] small{color:#526477;}
+:is(.st-key-paper_setup,.st-key-reading_workspace) button[kind="secondary"]{background:#eeedf6;color:#23394b;border-color:#d7d8e4;}
+:is(.st-key-paper_setup,.st-key-reading_workspace) [data-testid="stChatMessage"]{background:#f0eff7;}
+button[kind="primary"]{background:#6657b6;border-color:#6657b6;}
+button[kind="primary"] p{color:#fff!important;}
+.pp-chip{color:#594d8f;background:#ece8f7;}
+.pp-num.c0,.pp-num.c1,.pp-num.c2,.pp-num.c3{color:#5c5196;background:#eae5f6;}
+.pp-sub{color:#5c5196;}.pp-note{color:#596a78;}
+.pp-step b{color:#e4e8f1;}.pp-step{color:#b7c4d4;}
+.pp-step span.n{background:#67599d;}
+@media(max-width:640px){.pp-hero-new h1{font-size:2.7rem;}.st-key-paper_setup,.st-key-reading_workspace{padding:16px;}}
+</style>
+"""
+
+# Bundle the asset inside the repository so Streamlit Cloud can render it too.
+from base64 import b64encode as _b64encode
+from pathlib import Path as _Path
+_RESEARCH_BACKGROUND = _Path(__file__).resolve().parents[1] / "assets" / "research-companion.png"
+if _RESEARCH_BACKGROUND.is_file():
+    _background_uri = "data:image/png;base64," + _b64encode(_RESEARCH_BACKGROUND.read_bytes()).decode("ascii")
+    CSS += """
+<style>
+.stApp {background-image:linear-gradient(180deg,#0c172b9c,#111c30eb),url('ASSET_URI');background-size:cover;background-position:center top;background-attachment:fixed;}
+.pp-hero-new {background-image:linear-gradient(90deg,#0a1527ef 0%,#0a1527bf 43%,#0a15271a 78%),url('ASSET_URI');background-size:cover;background-position:center right;border-radius:15px;padding:35px 32px;min-height:360px;border:1px solid #ffffff12;}
+.pp-hero-new h1 {max-width:63%;font-size:3.25rem;}
+.pp-hero-new p {max-width:55%;}
+@media(max-width:640px){.pp-hero-new{padding:25px 22px;min-height:370px;background-position:65% center;}.pp-hero-new h1{font-size:2.5rem;max-width:100%;}.pp-hero-new p{max-width:100%;}.pp-hero-new{background-image:linear-gradient(90deg,#0a1527e8,#0a152791),url('ASSET_URI');}}
+</style>
+""".replace("ASSET_URI", _background_uri)
