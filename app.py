@@ -228,7 +228,7 @@ def main() -> None:
         st.caption("Understand the research.")
         if reading:
             if st.button("＋ Explore another paper", use_container_width=True):
-                for name in ("shown", "example", "from_cache", "editing_preferences", "active_pdf", "fetched", "question_index", "question_history"):
+                for name in ("shown", "example", "from_cache", "editing_preferences", "active_pdf", "fetched", "question_index", "question_history", "public_paper_confirmation"):
                     st.session_state.pop(name, None)
                 st.session_state["upload_version"] = st.session_state.get("upload_version", 0) + 1
                 st.rerun()
@@ -247,6 +247,7 @@ def main() -> None:
 
     st.markdown(style.HERO if not reading else style.WORKSPACE_HEADER, unsafe_allow_html=True)
     go, open_example, choice = False, False, None
+    needs_public_confirmation = False
     pdf_bytes = st.session_state.get("active_pdf")
     length, level, tone, beyond = "Medium", "Beginner", "Playful", False
 
@@ -262,10 +263,12 @@ def main() -> None:
                 st.markdown("### 1. Choose your paper")
                 upload_tab, arxiv_tab = st.tabs(["Upload PDF", "Find on arXiv"])
                 with upload_tab:
-                    is_public = st.checkbox("This is a public paper I am allowed to share. It is not confidential.")
-                    upload = st.file_uploader("Choose your research paper", type=["pdf"], disabled=not is_public,
+                    upload = st.file_uploader("Choose your research paper", type=["pdf"],
                                               key=f"upload_{st.session_state.get('upload_version', 0)}")
                     st.caption("PDF · up to 15 MB · readable text required")
+                    is_public = st.checkbox("I confirm this PDF is public and not confidential.", key="public_paper_confirmation")
+                    if not is_public:
+                        st.caption("You can select a file now. Check the confirmation above to enable its explanation; no PDF text is sent to the model until you confirm and click Explain.")
                 with arxiv_tab:
                     query = st.text_input("Paper title, arXiv link or ID", max_chars=300, key="arxiv_query",
                                           placeholder="Paste an arXiv link, ID, or a paper title")
@@ -283,8 +286,9 @@ def main() -> None:
                     if st.button("Remove arXiv selection"):
                         del st.session_state["fetched"]
                         st.rerun()
-                pdf_bytes = upload.getvalue() if (is_public and upload) else (fetched[0] if fetched else None)
-                if is_public and upload and fetched:
+                needs_public_confirmation = upload is not None and not is_public
+                pdf_bytes = upload.getvalue() if upload is not None else (fetched[0] if fetched else None)
+                if upload is not None and fetched:
                     st.caption("Your uploaded PDF will be used instead of the arXiv selection.")
             defaults = shown_options if reading else LessonOptions()
             st.markdown("### " + ("Reading preferences" if reading else "2. Make it yours"))
@@ -301,7 +305,9 @@ def main() -> None:
             beyond = st.toggle("Include context beyond the paper", value=defaults.beyond, key="pref_beyond",
                                help="Uses the model's general knowledge. Not checked against the paper and may be out of date.")
             go = st.button("Update explanation" if reading else "Explain this paper →", type="primary",
-                           use_container_width=True, disabled=pdf_bytes is None)
+                           use_container_width=True, disabled=pdf_bytes is None or needs_public_confirmation)
+            if needs_public_confirmation:
+                st.warning("One more step: confirm that your uploaded PDF is public to enable Explain this paper.")
             if reading and pdf_bytes is None:
                 st.info("This is a prewritten example. Explore another paper and upload a PDF to generate an explanation with your own preferences.")
         if not reading:
@@ -325,6 +331,10 @@ def main() -> None:
             st.session_state.pop(key, None)
         st.rerun()
 
+    if go and needs_public_confirmation:
+        st.warning("Confirm that your PDF is public before generating an explanation.")
+        go = False
+
     if go:
         previous_result = st.session_state.get("shown")
         options = LessonOptions(length, level, tone, beyond).normalised()
@@ -339,7 +349,7 @@ def main() -> None:
         elif not api_key:
             st.error("This app is not configured yet (no API key).")
         elif not limiter.try_start():  # one generation at a time
-            st.info("Another paper is being explained right now. Please try again in a minute.")
+            st.warning("The explanation service is busy with another visitor. Your paper and preferences are still selected. Wait a moment, then click Explain again. You can browse an example while waiting.")
         else:
             try:
                 reserved, message = limiter.reserve_lesson(usage)  # check and reserve in one atomic step

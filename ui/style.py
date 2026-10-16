@@ -213,3 +213,25 @@ if _RESEARCH_BACKGROUND.is_file():
 @media(max-width:640px){.pp-hero-new{padding:25px 22px;min-height:370px;background-position:65% center;}.pp-hero-new h1{font-size:2.5rem;max-width:100%;}.pp-hero-new p{max-width:100%;}.pp-hero-new{background-image:linear-gradient(90deg,#0a1527e8,#0a152791),url('ASSET_URI');}}
 </style>
 """.replace("ASSET_URI", _background_uri)
+
+# Ensure native controls remain legible inside light panels under the dark app theme.
+CSS += """
+<style>
+.st-key-paper_setup [data-testid="stCheckbox"]:has(input:not([role="switch"])) label > span + div {
+ background:#fff!important;border:2px solid #64748b!important;border-radius:4px!important;
+}
+.st-key-paper_setup [data-testid="stCheckbox"]:has(input:checked:not([role="switch"])) label > span + div {
+ background:#6657b6!important;border-color:#6657b6!important;color:#fff!important;
+}
+.st-key-paper_setup [data-testid="stCheckbox"]:has(input:focus-visible) label {outline:2px solid #6657b6;outline-offset:4px;}
+:is(.st-key-reading_workspace,.st-key-paper_setup) [data-testid="stExpander"] details,
+:is(.st-key-reading_workspace,.st-key-paper_setup) [data-testid="stExpander"] summary {
+ background:#fff!important;color:#172e40!important;
+}
+:is(.st-key-reading_workspace,.st-key-paper_setup) [data-testid="stExpander"] summary:is(:hover,:focus-visible,:active),
+:is(.st-key-reading_workspace,.st-key-paper_setup) [data-testid="stExpander"] details[open] > summary {
+ background:#eeebf8!important;color:#172e40!important;
+}
+:is(.st-key-reading_workspace,.st-key-paper_setup) [data-testid="stExpander"] summary * {color:#172e40!important;}
+</style>
+"""
